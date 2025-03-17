@@ -4,59 +4,59 @@ import math
 #---objects
 
 class character():
-  def __init__(self, name, health, attack, defense):
+  def __init__(self, name, health, attack, defense) -> None:
     self.name = name 
     self.health = health
     self.attack = attack
     self.defense = defense
     
-  def show_current_stats(self):
+  def show_current_stats(self) -> None:
     print(f"Health: {self.health}, Attack: {self.attack}, Defense: {self.defense}" )
 
 
 class Player(character):
-  def __init__(self, name, health, attack, defense, inv):
+  def __init__(self, name, health, attack, defense, inv) -> None:
     super().__init__(name, health, attack, defense)
     self.inv = inv #will contain a list, initial inv may change based on what class
 
-  def basic_attack(self):
+  def basic_attack(self) -> None:
     print("Basic attack!") # return damage number
 
 
 class Knight(Player):
-  def __init__(self, name, health, attack, defense, inv):
+  def __init__(self, name, health, attack, defense, inv) -> None:
     super().__init__(name, health, attack, defense, inv)
 
-  def power_ability(self):
+  def power_ability(self) -> None:
     print("Power attack") 
 
-  def special_ability(self):
+  def special_ability(self) -> None:
     print("Special attack!")
 
 
 class Thief(Player):
-  def __init__(self, name, health, attack, defense, inv):
+  def __init__(self, name, health, attack, defense, inv) -> None:
     super().__init__(name, health, attack, defense, inv)
 
 
 class Vampire(Player):
-  def __init__(self, name, health, attack, defense, inv):
+  def __init__(self, name, health, attack, defense, inv) -> None:
     super().__init__(name, health, attack, defense, inv)
 
 
 class Enemy(character):
-  def __init__(self, name, health, attack, defense):
+  def __init__(self, name, health, attack, defense) -> None:
     super().__init__(name, health, attack, defense)
 
 
 #---functions
-def intro_to_game(): #introduces the game and asks for the user's name/class/stats
+def intro_to_game() -> None: #introduces the game and asks for the user's name/class/stats
   print("Welcome to Text Based RPG!")
   print()
 
-def create_player():
-  char = ""
-  name = ""
+def create_player() -> None:
+  char: str = ""
+  name: str = ""
   
   print("Choose your class!")
   print("'K' for Knight | 'T' for Thief | 'V' for Vampire")
