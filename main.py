@@ -1,5 +1,5 @@
 #---imports 
-import math
+import math, pandas as pd, numpy as np, csv
 
 #---objects
 
@@ -99,16 +99,27 @@ def display_map(): #shows the map so the user can see where they are
 def ask_for_action(): #character movement etc
   print("What would you like to do?")
 
+def return_map_as_list_of_lists():
+  map = []
+  with open('Map1.csv', 'r') as map_read:
+    csvreader = csv.reader(map_read)
+    for row in csvreader: 
+      map.append(list(row[0])) #list() takes the strings and makes them a list of str
+
+  return map
+
 
 #---main
 if __name__ == "__main__":
+ 
+  print(return_map_as_list_of_lists())
+  
   intro_to_game()
   create_player()
   #intro_to_map()
-
+  
   
   #game engine
-
   
   #while True:
     
