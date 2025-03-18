@@ -1,5 +1,5 @@
 #---imports 
-import math, pandas as pd, numpy as np, csv
+import csv
 
 #---objects
 
@@ -15,8 +15,10 @@ class character():
 
 
 class Player(character):
-  def __init__(self, name, health, attack, defense, inv) -> None:
+  def __init__(self, name, health, attack, defense, x_coordinate, y_coordinate, inv) -> None:
     super().__init__(name, health, attack, defense)
+    self.x = x_coordinate
+    self.y = y_coordinate
     self.inv = inv #will contain a list, initial inv may change based on what class
 
   def basic_attack(self) -> None:
@@ -24,8 +26,8 @@ class Player(character):
 
 
 class Knight(Player):
-  def __init__(self, name, health, attack, defense, inv) -> None:
-    super().__init__(name, health, attack, defense, inv)
+  def __init__(self, name, health, attack, defense, x_coordinate, y_coordinate, inv) -> None:
+    super().__init__(name, health, attack, defense, x_coordinate, y_coordinate, inv)
 
   def power_ability(self) -> None:
     print("Power attack") 
@@ -35,18 +37,50 @@ class Knight(Player):
 
 
 class Thief(Player):
-  def __init__(self, name, health, attack, defense, inv) -> None:
-    super().__init__(name, health, attack, defense, inv)
-
+  def __init__(self, name, health, attack, defense, x_coordinate, y_coordinate, inv) -> None:
+    super().__init__(name, health, attack, defense, x_coordinate, y_coordinate, inv)
 
 class Vampire(Player):
-  def __init__(self, name, health, attack, defense, inv) -> None:
-    super().__init__(name, health, attack, defense, inv)
+  def __init__(self, name, health, attack, defense, x_coordinate, y_coordinate, inv) -> None:
+    super().__init__(name, health, attack, defense, x_coordinate, y_coordinate, inv)
 
 
 class Enemy(character):
   def __init__(self, name, health, attack, defense) -> None:
     super().__init__(name, health, attack, defense)
+
+class Map():
+  def __init__(self, map):
+    self.map = map
+
+  def __str__(self) -> str: #shows map
+    pass
+
+  def return_row_as_string(self, row_list: list[str]) -> str: #need to add player to the proper row_list prior to sending to this function
+    row_string: str = ""
+    
+    for r in row_list:
+      row_string += r
+
+    
+    return row_string
+  
+  def print_full_map_w_player(self, player) -> None: #need to edit code for player to be in? also need __str__?
+    current_row_str = ""
+    current_row_index = 0
+    
+    for row in self.map:
+      current_row_str = map.return_row_as_string(row)
+      
+      if current_row_index == player.y: #this code inserts the player as "P"
+        current_row_str = current_row_str[:player.x] + "P" + current_row_str[player.x:]
+        
+      current_row_index += 1
+      print(current_row_str)
+      
+#  def print_visible_area(self) -> None:
+#    for row in self.map:
+
 
 
 #---functions
@@ -54,7 +88,7 @@ def intro_to_game() -> None: #introduces the game and asks for the user's name/c
   print("Welcome to Text Based RPG!")
   print()
 
-def create_player() -> None:
+def create_player():
   char: str = ""
   name: str = ""
   
@@ -80,26 +114,21 @@ def create_player() -> None:
   name = input("What is your name: ")
 
   if char == "Knight":
-    player = Knight(name,0,0,0,[])
+    return Knight(name,0,0,0,0,0,[])
   elif char == "Thief":
-    #player = Thief(name,0,0,0,[])
-    print(name)
+    return Thief(name,0,0,0,0,0,[])
   elif char == "Vampire":
-    #player = Vampire(name,0,0,0,[])
-    print(name)
+    return Vampire(name,0,0,0,0,0,[])
   else:
     print("There is an error")
 
   print(f"So your name is {name}!")
 
-def display_map(): #shows the map so the user can see where they are
-  print("-----------------")
-
 
 def ask_for_action(): #character movement etc
   print("What would you like to do?")
 
-def return_map_as_list_of_lists():
+def return_map_as_list_of_lists():  #likely should be moved the Map object at some point
   map = []
   with open('Map1.csv', 'r') as map_read:
     csvreader = csv.reader(map_read)
@@ -111,11 +140,12 @@ def return_map_as_list_of_lists():
 
 #---main
 if __name__ == "__main__":
- 
-  print(return_map_as_list_of_lists())
-  
+
   intro_to_game()
-  create_player()
+  player = create_player()
+  map = Map(return_map_as_list_of_lists())
+  map.print_full_map_w_player(player)
+  
   #intro_to_map()
   
   
@@ -125,7 +155,6 @@ if __name__ == "__main__":
     
 
 #Testing
-  
-#player = Knight("Josh", 50, 10, 5, [])
+#player = Knight("Josh", 50, 10, 5, 10, 10, [])
 #player.showCurrentStats()
 #player.powerAttack()
