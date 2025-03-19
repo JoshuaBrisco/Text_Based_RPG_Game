@@ -50,19 +50,27 @@ class Enemy(character):
     super().__init__(name, health, attack, defense)
 
 class Map():
-  def __init__(self, map):
-    self.map = map
+  def __init__(self):
+    self.map = self.map_as_list_of_lists(1) #number passed is which map to start on
 
   def __str__(self) -> str: #shows map
     pass
 
-  def return_row_as_string(self, row_list: list[str]) -> str: #need to add player to the proper row_list prior to sending to this function
+  def map_as_list_of_lists(self, map_number) -> list[list]:
+    map = []
+    with open(f'Map{map_number}.csv', 'r') as map_read:
+      csvread = csv.reader(map_read)
+      for row in csvread: 
+        map.append(list(row)) #list() takes the strings and makes them a list of str
+
+    return map
+  
+  def return_row_as_string(self, row_list: list[str]) -> str:
     row_string: str = ""
     
     for r in row_list:
       row_string += r
 
-    
     return row_string
   
   def print_full_map_w_player(self, player) -> None: #need to edit code for player to be in? also need __str__?
@@ -78,9 +86,22 @@ class Map():
       current_row_index += 1
       print(current_row_str)
       
-#  def print_visible_area(self) -> None:
-#    for row in self.map:
+  def print_visible_area(self, player) -> None:
+    visible_row_str = ""
+    current_row_index = 0
+    
+    for row in self.map:
+      visible_row_str = map.return_row_as_string(row)
 
+      if current_row_index == player.y: #this code inserts the player as "P"
+        visible_row_str = visible_row_str[:player.x] + "P" + visible_row_str[player.x:]
+      
+      visible_row_str = visible_row_str[(player.x - 5):(player.x + 6)] #HORIZONTAL Vision
+
+      if current_row_index >= player.y - 3 and current_row_index <= player.y + 3: 
+        print(visible_row_str) #VERTICAL Vision
+      
+      current_row_index += 1
 
 
 #---functions
@@ -111,14 +132,19 @@ def create_player():
       print("Not an appropriate choice, try again!")
   print(f"You chose {char}!")   
 
-  name = input("What is your name: ")
+  while True:
+    name = input("What is your name: ")
+    if name == "":
+      print("Please enter a name!")
+    else:
+      break
 
   if char == "Knight":
-    return Knight(name,0,0,0,0,0,[])
+    return Knight(name,0,0,0,20,20,[])
   elif char == "Thief":
-    return Thief(name,0,0,0,0,0,[])
+    return Thief(name,0,0,0,20,20,[])
   elif char == "Vampire":
-    return Vampire(name,0,0,0,0,0,[])
+    return Vampire(name,0,0,0,20,20,[])
   else:
     print("There is an error")
 
@@ -131,9 +157,9 @@ def ask_for_action(): #character movement etc
 def return_map_as_list_of_lists():  #likely should be moved the Map object at some point
   map = []
   with open('Map1.csv', 'r') as map_read:
-    csvreader = csv.reader(map_read)
-    for row in csvreader: 
-      map.append(list(row[0])) #list() takes the strings and makes them a list of str
+    csvread = csv.reader(map_read)
+    for row in csvread: 
+      map.append(list(row)) #list() takes the strings and makes them a list of str
 
   return map
 
@@ -143,8 +169,8 @@ if __name__ == "__main__":
 
   intro_to_game()
   player = create_player()
-  map = Map(return_map_as_list_of_lists())
-  map.print_full_map_w_player(player)
+  map = Map()
+  map.print_visible_area(player)
   
   #intro_to_map()
   
