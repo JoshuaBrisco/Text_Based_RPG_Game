@@ -1,5 +1,5 @@
 #---imports 
-import csv
+import csv, os
 
 #---objects
 
@@ -21,6 +21,26 @@ class Player(character):
     self.y = y_coordinate
     self.inv = inv #will contain a list, initial inv may change based on what class
 
+  def move(self) -> None:
+    print("W = North | D = East | S = South | A = West")
+    
+    while True:
+      direction:str = input("Which direction do you move?:")
+      if direction.lower() == "n" or direction.lower() == "w":
+        self.y -= 1
+        break
+      elif direction.lower() == "e" or direction.lower() == "d":
+        self.x += 1
+        break
+      elif direction.lower() == "s":
+        self.y += 1
+        break
+      elif direction.lower() == "a":
+        self.x -= 1
+        break
+      else:
+        print("Not a direction. Try again!")
+  
   def basic_attack(self) -> None:
     print("Basic attack!") # return damage number
 
@@ -48,6 +68,7 @@ class Vampire(Player):
 class Enemy(character):
   def __init__(self, name, health, attack, defense) -> None:
     super().__init__(name, health, attack, defense)
+
 
 class Map():
   def __init__(self):
@@ -102,7 +123,6 @@ class Map():
         print(visible_row_str) #VERTICAL Vision
       
       current_row_index += 1
-
 
 #---functions
 def intro_to_game() -> None: #introduces the game and asks for the user's name/class/stats
@@ -170,9 +190,14 @@ if __name__ == "__main__":
   intro_to_game()
   player = create_player()
   map = Map()
-  map.print_visible_area(player)
-  
-  #intro_to_map()
+
+  while True:
+    os.system('clear')
+    map.print_visible_area(player)
+    player.move() #breaks the map function below
+    
+#    if check_levelup():
+#      player.levelup()
   
   
   #game engine
