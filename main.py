@@ -1,5 +1,7 @@
 #---imports 
-import csv, os
+import csv
+import os
+import random
 
 #---objects
 
@@ -73,16 +75,17 @@ class Enemy(character):
 class Map():
   def __init__(self):
     self.map = self.map_as_list_of_lists(1) #number passed is which map to start on
-
+    
   def __str__(self) -> str: #shows map
     pass
+    
 
   def map_as_list_of_lists(self, map_number) -> list[list]:
     map = []
     with open(f'Map{map_number}.csv', 'r') as map_read:
       csvread = csv.reader(map_read)
-      for row in csvread: 
-        map.append(list(row)) #list() takes the strings and makes them a list of str
+      for row in csvread: #row is a list with one item of type string
+        map.append(list(row[0])) #list() takes the strings and makes them a list of str
 
     return map
   
@@ -112,7 +115,7 @@ class Map():
     current_row_index = 0
     
     for row in self.map:
-      visible_row_str = map.return_row_as_string(row)
+      visible_row_str = self.return_row_as_string(row)
 
       if current_row_index == player.y: #this code inserts the player as "P"
         visible_row_str = visible_row_str[:player.x] + "P" + visible_row_str[player.x:]
@@ -123,6 +126,38 @@ class Map():
         print(visible_row_str) #VERTICAL Vision
       
       current_row_index += 1
+
+class EventManager():
+  def __init__(self):
+    self.turns_complete = 0
+    self.turns_since_last_encounter = 0
+
+  def complete_turn(self):
+    self.turns_complete += 1
+    self.turns_since_last_encounter += 1
+
+  def check_for_encounter(self, player, map) -> bool: #player is passed to use its data to adjust the encounter chance
+    if map.map[player.y][player.x] == ".":
+      location_modifier = 0.3
+    elif map.map[player.y][player.x] == "t":
+      location_modifier = 0.6
+    else:
+      location_modifier = 0
+    calculated_chance = (min(10, self.turns_since_last_encounter) / 10) * location_modifier 
+
+    print(f"Location modifier: {location_modifier}")
+    print(f"Calculated chance of encounter: {calculated_chance}")
+    
+    if random.random() <= calculated_chance:
+      return True
+    else:
+      return False
+
+  def initiate_encounter(self, player, map):
+    print("Encountered a beast!")
+    print("You win!")
+    input("Continue?")
+    self.turns_since_last_encounter = 0
 
 #---functions
 def intro_to_game() -> None: #introduces the game and asks for the user's name/class/stats
@@ -174,15 +209,6 @@ def create_player():
 def ask_for_action(): #character movement etc
   print("What would you like to do?")
 
-def return_map_as_list_of_lists():  #likely should be moved the Map object at some point
-  map = []
-  with open('Map1.csv', 'r') as map_read:
-    csvread = csv.reader(map_read)
-    for row in csvread: 
-      map.append(list(row)) #list() takes the strings and makes them a list of str
-
-  return map
-
 
 #---main
 if __name__ == "__main__":
@@ -190,13 +216,23 @@ if __name__ == "__main__":
   intro_to_game()
   player = create_player()
   map = Map()
-
+  event = EventManager()
+  
   while True:
     os.system('clear')
     map.print_visible_area(player)
-    player.move() #breaks the map function below
+    player.move()
+    if event.check_for_encounter(player, map):
+      event.initiate_encounter(player, map)
+
+
     
-#    if check_levelup():
+    event.complete_turn() # still need to write the code that resets the turns since encounter in the event manager object
+
+
+  #  if event.check_for_encounter(player, map):
+ #     pass
+#      if check_levelup():
 #      player.levelup()
   
   
