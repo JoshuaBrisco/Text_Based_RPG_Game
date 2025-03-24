@@ -2,25 +2,29 @@
 import csv
 import os
 import random
+import re
 
 #---objects
 
 class character():
-  def __init__(self, name, health, attack, defense) -> None:
+  def __init__(self, name, health, attack, defense, speed) -> None:
     self.name = name 
     self.health = health
     self.attack = attack
     self.defense = defense
+    self.speed = speed
     
   def show_current_stats(self) -> None:
-    print(f"Health: {self.health}, Attack: {self.attack}, Defense: {self.defense}" )
+    print(f"Health: {self.health}, Attack: {self.attack}, Defense: {self.defense}, Speed: {self.speed}" )
 
 
 class Player(character):
-  def __init__(self, name, health, attack, defense, x_coordinate, y_coordinate, inv) -> None:
-    super().__init__(name, health, attack, defense)
+  def __init__(self, name, health, attack, defense, speed, x_coordinate, y_coordinate, inv) -> None:
+    super().__init__(name, health, attack, defense, speed)
     self.x = x_coordinate
     self.y = y_coordinate
+    self.exp = 0
+    self.level = 1
     self.inv = inv #will contain a list, initial inv may change based on what class
 
   def move(self) -> None:
@@ -42,15 +46,48 @@ class Player(character):
         break
       else:
         print("Not a direction. Try again!")
-  
+
+  def check_for_level_up(self):
+    if self.exp >= 1:
+      return True
+    else:
+      return False
   def basic_attack(self) -> None:
     print("Basic attack!") # return damage number
 
 
 class Knight(Player):
-  def __init__(self, name, health, attack, defense, x_coordinate, y_coordinate, inv) -> None:
-    super().__init__(name, health, attack, defense, x_coordinate, y_coordinate, inv)
+  def __init__(self, name, health, attack, defense, speed, x_coordinate, y_coordinate, inv) -> None:
+    super().__init__(name, health, attack, defense, speed, x_coordinate, y_coordinate, inv)
 
+  def level_up(self):
+    self.exp = 0
+    self.level += 1
+    print(f"You leveled up to level {self.level}!")
+    print("Choose a stat to increase!")
+
+    while True:
+      level_choice = input("H for Health | A for Attack | D for Defense | S for Speed:")
+      if level_choice.lower() == 'h':
+        self.health += 2
+        input ("You chose health! Press enter to proceed.")
+        break
+      elif level_choice.lower() == 'a':
+        self.attack += 1
+        input ("You chose attack! Press enter to proceed.")
+        break
+      elif level_choice.lower() == 'd':
+        self.defense += 1
+        input ("You chose defense! Press enter to proceed.")
+        break
+      elif level_choice.lower() == 's':
+        self.speed += 1
+        input ("You chose speed! Press enter to proceed.")
+        break
+      else:
+        print("Not a valid choice. Try again!")
+
+  
   def power_ability(self) -> None:
     print("Power attack") 
 
@@ -59,26 +96,22 @@ class Knight(Player):
 
 
 class Thief(Player):
-  def __init__(self, name, health, attack, defense, x_coordinate, y_coordinate, inv) -> None:
-    super().__init__(name, health, attack, defense, x_coordinate, y_coordinate, inv)
+  def __init__(self, name, health, attack, defense, speed, x_coordinate, y_coordinate, inv) -> None:
+    super().__init__(name, health, attack, defense, speed, x_coordinate, y_coordinate, inv)
 
 class Vampire(Player):
-  def __init__(self, name, health, attack, defense, x_coordinate, y_coordinate, inv) -> None:
-    super().__init__(name, health, attack, defense, x_coordinate, y_coordinate, inv)
+  def __init__(self, name, health, attack, defense, speed, x_coordinate, y_coordinate, inv) -> None:
+    super().__init__(name, health, attack, defense, speed, x_coordinate, y_coordinate, inv)
 
 
 class Enemy(character):
-  def __init__(self, name, health, attack, defense) -> None:
-    super().__init__(name, health, attack, defense)
+  def __init__(self, name, health, attack, defense, speed) -> None:
+    super().__init__(name, health, attack, defense, speed)
 
 
 class Map():
   def __init__(self):
     self.map = self.map_as_list_of_lists(1) #number passed is which map to start on
-    
-  def __str__(self) -> str: #shows map
-    pass
-    
 
   def map_as_list_of_lists(self, map_number) -> list[list]:
     map = []
@@ -154,9 +187,46 @@ class EventManager():
       return False
 
   def initiate_encounter(self, player, map):
-    print("Encountered a beast!")
-    print("You win!")
-    input("Continue?")
+    
+    enemy = create_enemy(map)
+    print(f"Encountered a {enemy.name}!")
+    print("----------------------------")
+
+    while True:
+      choice = input("Try to run? Enter 'y' to try to escape or 'n' to fight." ) # implement a chance based running system
+      if choice.lower() == 'n':
+        input("You didn't try to escape! Press enter to proceed.")
+        break
+      elif choice.lower() == "y":
+        escape_chance = 0.2
+        if random.random() <= escape_chance:
+          input("You escaped! Press enter to proceed.")
+          del enemy
+          return
+        input("You didnt escape! Press enter to proceed.")
+        break
+      else:
+        print("Try again!")
+
+    
+    while True: #combat loop
+      os.system('clear')
+      print()
+      print(f"{enemy.name}\n Health: {enemy.health}\n Atk: {enemy.attack} | Def: {enemy.defense} | Spd: {enemy.speed}\n--------------------------\n{player.name}\n Health: {player.health}\n Atk: {player.attack} | Def: {player.defense} | Spd: {player.speed}")
+      
+      if enemy.health <= 0: #checks if enemy is dead
+        print(f"{enemy.name} killed.") #need to add experience gained
+        player.exp += 1
+        input("Press enter to proceed.")
+        del enemy
+        break
+
+      
+      
+      print()
+      input("1 for basic attack | 2 for power attack | 3 for special attack.") #eventually need to code a descriptive way (within the player class) to tell the player what moves they have
+      enemy.health -= 1
+    
     self.turns_since_last_encounter = 0
 
 #---functions
@@ -195,15 +265,22 @@ def create_player():
       break
 
   if char == "Knight":
-    return Knight(name,0,0,0,20,20,[])
+    return Knight(name,10,5,5,5,20,20,[])
   elif char == "Thief":
-    return Thief(name,0,0,0,20,20,[])
+    return Thief(name,10,5,5,5,20,20,[])
   elif char == "Vampire":
-    return Vampire(name,0,0,0,20,20,[])
+    return Vampire(name,10,5,5,5,20,20,[])
   else:
     print("There is an error")
 
   print(f"So your name is {name}!")
+
+def create_enemy(map) -> Enemy:
+  #Tier system
+  #A tier
+  #B tier
+  #C tier
+  return Enemy("Rat", 10, 5, 5, 5)
 
 
 def ask_for_action(): #character movement etc
@@ -217,6 +294,7 @@ if __name__ == "__main__":
   player = create_player()
   map = Map()
   event = EventManager()
+
   
   while True:
     os.system('clear')
@@ -224,7 +302,8 @@ if __name__ == "__main__":
     player.move()
     if event.check_for_encounter(player, map):
       event.initiate_encounter(player, map)
-
+    if player.check_for_level_up():
+      player.level_up()
 
     
     event.complete_turn() # still need to write the code that resets the turns since encounter in the event manager object

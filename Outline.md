@@ -15,7 +15,7 @@ Systems:
       Option A: Range of possible numbers
       Option B: Dice based
   Map:
-    A list of lists/array depending on what is possible with python
+    A list of lists each containing a one character string
     Implementation of vision range?
     Big map using letters to identify what type of terrain it is (F = forrest, M/A = mountain, etc), thinking 100 x 100
     Only see ~8x8 while moving around with imputting WASD
