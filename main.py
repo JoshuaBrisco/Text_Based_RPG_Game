@@ -2,7 +2,6 @@
 import csv
 import os
 import random
-import re
 
 #---objects
 
@@ -26,6 +25,7 @@ class Player(character):
     self.exp = 0
     self.level = 1
     self.inv = inv #will contain a list, initial inv may change based on what class
+    self.skill_choice_made = ['','','']
 
   def move(self) -> None:
     print("W = North | D = East | S = South | A = West")
@@ -87,13 +87,67 @@ class Knight(Player):
       else:
         print("Not a valid choice. Try again!")
 
+    if self.level == 5:
+      print("1 for Uppercut | 2 for Stun") #skill choice options at lvl 5
+      level_choice = input("Pick your new skill: ")
+      while True:
+        if level_choice == '1':
+          self.skill_choice_made[0] = "Uppercut"
+          break
+        if level_choice == '2':
+          self.skill_choice_made[0] = "Stun"
+          break
+        else:
+          print("Not a valid choice. Try again!")
+
+    if self.level == 10:
+      print("1 for Tank Mode | 2 for Bandage") #skill choice options at lvl 10
+      level_choice = input("Pick your new skill: ")
+      while True:
+        if level_choice == '1':
+          self.skill_choice_made[1] = "Tank Mode"
+          break
+        if level_choice == '2':
+          self.skill_choice_made[1] = "Bandage"
+          break
+        else:
+          print("Not a valid choice. Try again!")
+
+    if self.level == 15:
+      print("") #skill choice options at lvl 15
+      level_choice = input("Pick your new skill: ")
+      while True:
+        if level_choice == '1':
+          self.skill_choice_made[2] = "Passive 1"
+          break
+        if level_choice == '2':
+          self.skill_choice_made[2] = "Passive 2"
+          break
+        #if level_choice == '3':
+        #  self.skill_choice_made[2] = 3
+        else:
+          print("Not a valid choice. Try again!")
+
   
   def power_ability(self) -> None:
-    print("Power attack") 
+    print(f"You used {self.skill_choice_made[0]}") 
 
   def special_ability(self) -> None:
-    print("Special attack!")
+    print(f"You used {self.skill_choice_made[1]}!")
 
+  def passive_ability(self) -> None:
+    print(f"You used {self.skill_choice_made[2]}!")
+
+  def print_skill_options(self) -> None:
+    text = "1 for Basic Attack"
+    
+    if self.level >= 5:
+      text = text + f" | 2 for {self.skill_choice_made[0]}"
+    if self.level >= 10:
+      text = text + f" | 3 for {self.skill_choice_made[1]}"
+
+    
+    print(text)
 
 class Thief(Player):
   def __init__(self, name, health, attack, defense, speed, x_coordinate, y_coordinate, inv) -> None:
@@ -203,7 +257,7 @@ class EventManager():
           input("You escaped! Press enter to proceed.")
           del enemy
           return
-        input("You didnt escape! Press enter to proceed.")
+        input("You didnt escape!")
         break
       else:
         print("Try again!")
@@ -214,17 +268,16 @@ class EventManager():
       print()
       print(f"{enemy.name}\n Health: {enemy.health}\n Atk: {enemy.attack} | Def: {enemy.defense} | Spd: {enemy.speed}\n--------------------------\n{player.name}\n Health: {player.health}\n Atk: {player.attack} | Def: {player.defense} | Spd: {player.speed}")
       
-      if enemy.health <= 0: #checks if enemy is dead
-        print(f"{enemy.name} killed.") #need to add experience gained
+      if enemy.health <= 0: #checks if enemy is dead and breaks out of while loop if it is
+        print(f"{enemy.name} killed.") #need to add experience gained based on the enemy, possibly base it off of the difficulty
         player.exp += 1
         input("Press enter to proceed.")
         del enemy
         break
-
-      
       
       print()
-      input("1 for basic attack | 2 for power attack | 3 for special attack.") #eventually need to code a descriptive way (within the player class) to tell the player what moves they have
+      player.print_skill_options()
+      input("Enter your choice: ")
       enemy.health -= 1
     
     self.turns_since_last_encounter = 0
